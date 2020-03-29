@@ -1,0 +1,17 @@
+
+     //identifies the id of a verse in the database
+     private String setCurrentID(){
+        Long currentID;
+        Date date = new Date();
+        long time = date.getTime();
+        java.sql.Timestamp startDate = java.sql.Timestamp.valueOf("2018-06-23 14:45:00.0");
+        Timestamp current = new Timestamp(date.getTime());
+        long then = startDate.getTime();
+        long now = current.getTime();
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(now - then)+1;
+        currentID = minutes;
+        while (currentID > 31102){
+            currentID = currentID - 31102;
+        }
+        return Long.toString(currentID);
+    }
