@@ -1,12 +1,18 @@
 package com.giovannisaberon.simpleegw;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -83,6 +89,41 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     };
 
+    private SharedPreferences pref;
+    ArrayList<String> selectedbooks;
+    int currentIndex;
+    String currentbook;
+
+    private void displayVerse(String item){
+        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        mContentView = findViewById(R.id.fullscreen_content);
+        TextView textView = (TextView) mContentView;
+        textView.setText(item);
+    }
+
+    private void nextItem(){
+        currentIndex = currentIndex + 1;
+        if (currentIndex>=selectedbooks.size()-1) {
+            currentIndex = selectedbooks.size() - 1;
+        }
+        pref = getApplicationContext().getSharedPreferences("FullScreenPrefs", 0);
+        currentbook = selectedbooks.get(currentIndex);
+        String paragraph = pref.getString(currentbook, null);
+        displayVerse(paragraph);
+    }
+
+    private void previousItem(){
+        currentIndex = currentIndex - 1;
+        if (currentIndex < 0 ) {
+            currentIndex = 0;
+        }
+
+        pref = getApplicationContext().getSharedPreferences("FullScreenPrefs", 0);
+        currentbook = selectedbooks.get(currentIndex);
+        String paragraph = pref.getString(currentbook, null);
+        displayVerse(paragraph);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,21 +133,63 @@ public class FullscreenActivity extends AppCompatActivity {
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
+        pref = getApplicationContext().getSharedPreferences("FullScreenPrefs", 0);
+        String bookcode = pref.getString("currentitem", "");
+        currentbook = bookcode;
+        String paragraph = pref.getString(bookcode, null);
+        selectedbooks = (ArrayList<String>) getIntent().getSerializableExtra("selectedbooks");
 
+        displayVerse(paragraph);
+        currentIndex = selectedbooks.indexOf(currentbook);
 
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+//        mContentView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                toggle();
+//            }
+//        });
+
+        mContentView.setOnTouchListener(new OnSwipeTouchListener(FullscreenActivity.this) {
+            public void onSwipeTop() {
+                Toast.makeText(FullscreenActivity.this, "top", Toast.LENGTH_SHORT).show();
+                toggle();
+
+            }
+            public void onSwipeRight() {
+                Log.i("swiperight", "swiperight");
+                previousItem();
+
+
+
+
+//                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(textView, fontminsize, fontmaxsize, 1,
+//                        TypedValue.COMPLEX_UNIT_DIP);
+
+
+
+            }
+            public void onSwipeLeft() {
+               Log.i("swipeleft", "swipeleft");
+                   nextItem();
+
+
+//                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(textView, fontminsize, fontmaxsize, 1,
+//                        TypedValue.COMPLEX_UNIT_DIP);
+            }
+
+            public void onSwipeBottom() {
+//                Toast.makeText(FullscreenActivity.this, "bottom", Toast.LENGTH_SHORT).show();
                 toggle();
             }
-        });
 
+        });
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {

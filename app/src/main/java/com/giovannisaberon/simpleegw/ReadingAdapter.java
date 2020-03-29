@@ -50,7 +50,7 @@ public class ReadingAdapter extends RecyclerView.Adapter<ReadingAdapter.MyViewHo
                     String bookcode = mDataset.get(getAdapterPosition());
                     EGWData egwData = selectedparagraphs.get(bookcode);
                     Log.i("book", egwData.getBookcode());
-                    listener.onVerseSelected(egwData);
+                    listener.onVerseSelected(mDataset, selectedparagraphs, egwData);
                 }
             });
         }
@@ -135,6 +135,6 @@ public class ReadingAdapter extends RecyclerView.Adapter<ReadingAdapter.MyViewHo
     }
 
     public interface VerseAdapterListener {
-        void onVerseSelected(EGWData egwData);
+        void onVerseSelected(ArrayList<String> selectedbooks, HashMap<String, EGWData> selectedparagraphs, EGWData selecteditem);
     }
 }

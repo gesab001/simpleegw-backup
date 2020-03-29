@@ -47,16 +47,31 @@ public class ReadingActivity extends AppCompatActivity implements ReadingAdapter
     JSONObject jsonObject = new JSONObject();
     String[] dataset;
     SharedPreferences pref;
+    private SharedPreferences.Editor editor;
+
 
     @Override
-    public void onVerseSelected(EGWData egwData) {
-        Intent intent = new Intent(this, FullscreenActivity.class);
-        startActivity(intent);
+    public void onVerseSelected(ArrayList<String> selectedbooks, HashMap<String, EGWData> selectedparagraphs, EGWData selecteditem) {
     }
 
-    public void fullScreen(EGWData egwData){
+    public void fullScreen(ArrayList<String> selectedbooks, HashMap<String, EGWData> selectedparagraphs, EGWData selecteditem){
+        pref = this.getApplicationContext().getSharedPreferences("FullScreenPrefs", 0);
+        editor = pref.edit();
 
+        String bookcode = selecteditem.getBookcode();
+        String paragraph = selecteditem.toString();
+        editor.putString("currentitem", bookcode);
+        editor.putString(bookcode, paragraph);
+        editor.commit();
+
+        for (EGWData egwData : selectedparagraphs.values()){
+            bookcode = egwData.getBookcode();
+            paragraph = egwData.toString();
+            editor.putString(bookcode, paragraph);
+            editor.commit();
+        }
         Intent intent = new Intent(this, FullscreenActivity.class);
+        intent.putExtra("selectedbooks", selectedbooks);
         startActivity(intent);
     }
 
@@ -192,8 +207,8 @@ public class ReadingActivity extends AppCompatActivity implements ReadingAdapter
 
         ReadingAdapter.VerseAdapterListener listener = new ReadingAdapter.VerseAdapterListener() {
             @Override
-            public void onVerseSelected(EGWData egwData) {
-                fullScreen(egwData);
+            public void onVerseSelected(ArrayList<String> selectedbooks, HashMap<String, EGWData> selectedparagraphs, EGWData selecteditem) {
+                fullScreen(selectedbooks, selectedparagraphs, selecteditem);
             }
         };
 
